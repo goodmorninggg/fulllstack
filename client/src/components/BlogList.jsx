@@ -1,7 +1,9 @@
 import React from 'react'
 import { useState } from 'react'
 import { blogCategories } from '../assets/assets'
+import { motion} from "motion/react"
 
+//export const blogCategories = ['All', 'Technology', 'Startup', 'Lifestyle', 'Finance']
 const BlogList = () => {
   const [menu, setMenu] = useState("All")
 
@@ -14,7 +16,9 @@ return (
             className={`cursor-pointer text-gray-500 ${menu === item && 'text-white px-4 pt-0.5'}`}>
             {item}
             {menu === item && (
-              <div className='absolute left-0 right-0 top-0 h-7 -z-1 bg-primary rounded-full'></div>
+              <motion.div layoutId="underline" 
+              transition={{type: 'spring',stiffness:500, damping: 30}}
+              className='absolute left-0 right-0 top-0 h-7 -z-1 bg-primary rounded-full'></motion.div>
             )}
           </button>
         </div>
