@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { assets } from "../assets/assets";
 import Navbar from "../components/Navbar";
 import { blog_data, comments_data } from "../assets/assets";
-import Footer from "../components/footer";
+import Footer from "../components/Footer";
 import Moment from "moment";
 import Loader from "../components/Loader";
 
