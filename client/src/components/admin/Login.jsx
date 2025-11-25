@@ -1,11 +1,33 @@
 import React, { useState } from "react";
+import { useAppContext } from "../../context/AppContext";
+import toast from "react-hot-toast";
+import axios from "axios";
+
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { axios, setToken } = useAppContext();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = async (e) => {
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
+    try {
+      const { data } = await axios.post("/api/admin/login", {
+        email,
+        password,
+      });
+
+      if (data.success) {
+        setToken(data.token);
+        localStorage.setItem("token", data.token);
+        axios.defaults.headers.common["Authorization"] = data.token;
+        // Note: Should ideally be `Bearer ${data.token}` if your backend expects it.
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
   return (
     <div className="flex items-center justify-center h-screen">
@@ -23,7 +45,7 @@ const Login = () => {
             </p>
           </div>
           <form
-            onSubmit={handleSubmit}
+            onSubmit={onSubmitHandler}
             className="mt-6 w-full sm:max-w-md text-gray-600"
           >
             <div className="flex flex-col">

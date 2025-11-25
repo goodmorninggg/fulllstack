@@ -30,7 +30,7 @@ export const addBlog = async (req, res) => {
     // optimization through imagekit URL transformation
     const optimizedImageUrl = imagekit.helper.buildSrc({
       src: response.filePath,
-      urlEndpoint: "https://ik.imagekit.io/brightbits",
+      urlEndpoint: "http://ik.imagekit.io/brightbits",
       transformation: [
         { quality: "auto" }, // Auto compression
         { format: "webp" }, // Convert to modern format
