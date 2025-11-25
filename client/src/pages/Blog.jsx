@@ -2,13 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { assets } from "../assets/assets";
 import Navbar from "../components/Navbar";
-import { blog_data, comments_data } from "../assets/assets";
+//import { blog_data, comments_data } from "../assets/assets";
 import Footer from "../components/Footer";
 import Moment from "moment";
 import Loader from "../components/Loader";
+import { useAppContext } from "../context/AppContext";
+import { toast } from "react-hot-toast";
+
+
 
 const Blog = () => {
   const { id } = useParams();
+  const {axios} = useAppContext();
 
   const [data, setData] = useState(null);
   const [comments, setComments] = useState([]);
@@ -16,16 +21,59 @@ const Blog = () => {
   const [content, setContent] = useState("");
 
   const fetchBlogData = async () => {
-    const data = blog_data.find((item) => item._id === id);
-    setData(data);
-  };
+    try {
+        // Use template literal to insert the blog ID into the URL
+        const {data} = await axios.get(`/api/blog/${id}`);
+        
+        // If request is successful, update state with the blog data
+        data.success ? setData(data.blog) : toast.error(data.message);
+        
+    } catch (error) {
+        // Handle errors (network issues, server errors)
+        toast.error(error.message);
+    }
+}
   const fetchComments = async () => {
-    setComments(comments_data);
-  };
+    try {
+        // Send POST request to fetch comments for a specific blog ID
+        const { data } = await axios.post('/api/blog/comments', { blogId: id })
+        
+        if (data.success) {
+            setComments(data.comments);
+        } else {
+            toast.error(data.message);
+        }
+        
+    } catch (error) {
+        // Handle server or network errors
+        toast.error(error.message);
+    }
+}
 
   const addComment = async (e) => {
     e.preventDefault();
-  };
+    try {
+        // Send POST request to add a new comment
+        const { data } = await axios.post('/api/blog/add-comment', { 
+            blog: id, // The ID of the blog post
+            name,     // The commenter's name (from state)
+            content   // The comment text (from state)
+        });
+
+        if (data.success) {
+            toast.success(data.message);
+            setName('');    // Clear the name input
+            setContent(''); // Clear the content input
+            
+            // Optionally: fetchComments() here to refresh the list immediately
+        } else {
+            toast.error(data.message);
+        }
+        
+    } catch (error) {
+        toast.error(error.message);
+    }
+}
 
   useEffect(() => {
     fetchBlogData();

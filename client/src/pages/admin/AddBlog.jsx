@@ -2,8 +2,13 @@ import React, { useEffect, useState } from "react";
 import { assets, blogCategories } from "../../assets/assets";
 import Quill from "quill";
 import { useRef } from "react";
+import { useAppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
+
 
 const AddBlog = () => {
+  const {axios} = useAppContext();
+  const [isAdding, setIsAdding] = useState(false); 
   const editorRef = useRef(null);
   const quillRef = useRef(null);
 
@@ -21,10 +26,51 @@ const AddBlog = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-    // This line stops the browser from doing a default page reload on form submission.
+    setIsAdding(true); // Start loading state
 
-    // All your form validation and data posting logic will go here.
-  };
+    try {
+        // 1. Prepare the blog data object
+        const blog = {
+            title,
+            subTitle,
+            description: quillRef.current.root.innerHTML, // Get rich text HTML
+            category,
+            isPublished
+        };
+
+        // 2. Create FormData to handle file upload along with JSON data
+        const formData = new FormData();
+        formData.append('blog', JSON.stringify(blog)); // Send object as string
+        formData.append('image', image); // Append the file object
+
+        // 3. Send POST request to the backend
+        const { data } = await axios.post('/api/blog/add', formData);
+
+        // 4. Handle Success Response
+        if (data.success) {
+            toast.success(data.message);
+            
+            // Reset all form states to initial values
+            setImage(false);
+            setTitle('');
+            setSubTitle(''); // Assuming you have this state setter
+            quillRef.current.root.innerHTML = ''; // Clear the editor content
+            setCategory('Startup'); // Reset category to default
+            setIsPublished(true); // Reset publish status
+        } else {
+            // Handle API-level failure (e.g., validation errors)
+            toast.error(data.message);
+        }
+
+    } catch (error) {
+        // 5. Handle Network/Server Errors
+        toast.error(error.message);
+        console.error(error); // Good for debugging
+    } finally {
+        // 6. Stop loading state regardless of success or failure
+        setIsAdding(false);
+    }
+};
   useEffect(() => {
     if (editorRef.current && !quillRef.current) {
       quillRef.current = new Quill(editorRef.current, { theme: "snow" });
@@ -117,8 +163,10 @@ const AddBlog = () => {
   cursor-pointer' onChange={e => setIsPublished(e.target.checked)}/>
 </div>
 
-<button type="submit" className='mt-8 w-40 h-10 bg-primary text-white
-rounded cursor-pointer text-sm'>Add Blog</button>
+<button disabled={isAdding} type="submit" className='mt-8 w-40 h-10 bg-primary text-white
+rounded cursor-pointer text-sm'>
+  {isAdding ? 'Adding Blog...' : 'Add Blog'}
+</button>
 
 </div>
 </form>
