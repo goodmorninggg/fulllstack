@@ -3,6 +3,7 @@ import imagekit from "../configs/imageKits.js";
 import Blog from "../models/Blog.js";
 import mongoose from "mongoose";
 import Comment from "../models/Comment.js";
+import main from "../configs/gemini.js";
 
 
 export const addBlog = async (req, res) => {
@@ -138,6 +139,19 @@ export const getBlogComments = async (req, res) => {
         
         res.json({ success: true, comments });
         
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export const generateContent = async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        
+        // Appends a specific instruction to ensure the AI returns simple text suitable for a blog
+        const content = await main(prompt + ' Generate a blog content for this topic in simple text format');
+        
+        res.json({ success: true, content });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }

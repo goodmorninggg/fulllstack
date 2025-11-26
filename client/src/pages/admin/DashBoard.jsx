@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { assets, dashboard_data } from "../../assets/assets";
 import BlogTableItem from "../../components/admin/BlogTableItem";
+import { useAppContext } from "../../context/AppContext";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState({
@@ -9,10 +10,19 @@ const Dashboard = () => {
     drafts: 0,
     recentBlogs: [],
   });
+  const {axios} = useAppContext();
 
   const fetchDashboard = async () => {
-    setDashboardData(dashboard_data);
-  };
+    try {
+        const {data} = await axios.get('/api/admin/dashboard');
+        
+        // Assuming you have a setDashboardData state setter
+        data.success ? setDashboardData(data.dashboardData) : toast.error(data.message);
+        
+    } catch (error) {
+        toast.error(error.message);
+    }
+}
 
   useEffect(() => {
     fetchDashboard();

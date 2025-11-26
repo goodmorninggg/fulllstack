@@ -4,11 +4,14 @@ import Quill from "quill";
 import { useRef } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { toast } from "react-hot-toast";
+import {parse} from 'marked'
+
 
 
 const AddBlog = () => {
   const {axios} = useAppContext();
   const [isAdding, setIsAdding] = useState(false); 
+  const [loading, setLoading] = useState(false); 
   const editorRef = useRef(null);
   const quillRef = useRef(null);
 
@@ -20,9 +23,34 @@ const AddBlog = () => {
   const [isPublished, setIsPublished] = useState(false); // Likely used for a checkbox/toggle
 
   const generateContent = async () => {
-    // This function will be called when the "Generate with AI" button is clicked.
-    // The 'async' keyword allows you to use 'await' when calling the AI service.
-  };
+    // 1. Validation
+    if (!title) return toast.error('Please enter a title');
+
+    try {
+        setLoading(true); // Start loading spinner
+
+        // 2. API Call
+        const { data } = await axios.post('/api/blog/generate', { prompt: title });
+
+        // 3. Success Handling
+        if (data.success) {
+            // Inject content into Quill editor
+            // Note: 'parse' likely refers to a library like 'html-react-parser' 
+            // or a helper function to safely convert the string to HTML.
+            quillRef.current.root.innerHTML = parse(data.content); 
+        } else {
+            toast.error(data.message);
+        }
+
+    } catch (error) {
+        // 4. Error Handling
+        toast.error(error.message);
+    } finally {
+        // 5. Cleanup (Critical Fix!)
+        // This runs whether the request succeeds OR fails, ensuring the spinner stops.
+        setLoading(false);
+    }
+}
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -128,7 +156,12 @@ const AddBlog = () => {
         <p className="mt-4">Blog Description</p>
         <div className="max-w-lg h-74 pb-16 sm:pb-10 pt-2 relative">
           <div ref={editorRef}></div>
-          <button
+          {loading && (
+    <div className='absolute right-0 top-0 bottom-0 left-0 flex items-center justify-center bg-black/10 mt-2'>
+        <div className='w-8 h-8 rounded-full border-2 border-t-white animate-spin'></div>
+    </div>
+)}
+          <button disabled={loading}
             type="button"
             onClick={generateContent}
             className="absolute 
