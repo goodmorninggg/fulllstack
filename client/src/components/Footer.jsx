@@ -9,9 +9,7 @@ const Footer = () => {
         <div>
           <img src={assets.logo} alt="logo" className="w-32 sm:w-44" />
           <p className="max-w-[410px] mt-6">
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. rerum
-            unde, quaerat eveniet cumque accusamus atque qui error quo enim
-            fugiat?
+            This is your space to think out loud, to share what matters, and to write without filters. Whether it's one word or a thousand, your story starts right here.
           </p>
         </div>
         
